@@ -1,20 +1,26 @@
 # Maintainer: Tales A. Mendonça <talesam@gmail.com>
 
-pkgname=pkgbuild-template
-pkgdesc="Package template for Communitybig"
-# Uncomment and edit the following lines as needed
-#depends=('')
-#makedepends=('')
-#optdepends=('')
-#conflicts=('')
-#provides=('')
-#replaces=('')
+pkgname=thunar-labs
+pkgdesc="Modern, fast and easy-to-use file manager for Xfce with embedded terminal support"
+depends=('desktop-file-utils' 'libexif' 'hicolor-icon-theme' 'libnotify'
+         'pcre2' 'libgudev' 'exo' 'libxfce4util' 'libxfce4ui' 'libpng' 'vt3')
+makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools')
+optdepends=('catfish: file searching'
+            'gvfs: trash support, mounting with udisk and remote filesystems'
+            'tumbler: thumbnail previews'
+            'thunar-volman: removable device management'
+            'thunar-archive-plugin: archive creation and extraction'
+            'thunar-media-tags-plugin: view/edit ID3/OGG tags')
+conflicts=('thunar')
+provides=('thunar')
+replaces=('thunar')
 pkgver=$(date +%y.%m.%d)
 pkgrel=$(date +%H%M)
-arch=('any')
-license=('MIT')
-url="https://github.com/big-comm/${pkgname}"
-source=("git+${url}.git")
+arch=('x86_64')
+license=('GPL-2.0-or-later' 'LGPL-2.1-only')
+groups=('xfce4')
+url="https://gitlab.xfce.org/bigbruno/thunar"
+source=("git+${url}.git#branch=embedded_terminal_v2")
 md5sums=('SKIP')
 
 # Automatically detect and use the correct install file
@@ -26,47 +32,63 @@ fi
 
 prepare() {
     cd "${srcdir}/${pkgname}"
-    # Add any preparation steps here, if needed
-    # For example: patch -p1 < "${srcdir}/patch-file.patch"
+    # Navigate to the thunar directory since it's cloned as thunar-labs but the repo is thunar
+    if [ -d "thunar" ]; then
+        cd thunar
+    fi
+    NOCONFIGURE=1 ./autogen.sh
 }
 
 build() {
     cd "${srcdir}/${pkgname}"
-    # Add build steps here, if needed
-    # For example: make
+    # Navigate to the thunar directory since it's cloned as thunar-labs but the repo is thunar
+    if [ -d "thunar" ]; then
+        cd thunar
+    fi
+    
+    ./configure \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --enable-gio-unix \
+        --enable-gudev \
+        --enable-notifications \
+        --enable-exif \
+        --enable-gtk-doc \
+        --disable-debug \
+        --enable-maintainer-mode
+    make
 }
 
 check() {
     cd "${srcdir}/${pkgname}"
+    # Navigate to the thunar directory since it's cloned as thunar-labs but the repo is thunar
+    if [ -d "thunar" ]; then
+        cd thunar
+    fi
     # Add check/test steps here, if needed
     # For example: make check
 }
 
 package() {
     cd "${srcdir}/${pkgname}"
-
-    # Determine the correct source directory
-    if [ -d "${pkgname}" ]; then
-        srcdir="${srcdir}/${pkgname}/${pkgname}"
-    else
-        srcdir="${srcdir}/${pkgname}"
+    # Navigate to the thunar directory since it's cloned as thunar-labs but the repo is thunar
+    if [ -d "thunar" ]; then
+        cd thunar
     fi
-
-    # Install files
-    local dirs=("usr" "etc" "opt")
-    for dir in "${dirs[@]}"; do
-        if [ -d "${srcdir}/${dir}" ]; then
-            cp -a "${srcdir}/${dir}" "${pkgdir}/"
-        fi
-    done
+    
+    make DESTDIR="$pkgdir" install
 
     # Install license file if present
-    if [ -f "LICENSE" ]; then
+    if [ -f "COPYING" ]; then
+        install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+    elif [ -f "LICENSE" ]; then
         install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
     fi
 
     # Install documentation if present
     if [ -f "README.md" ]; then
         install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+    elif [ -f "README" ]; then
+        install -Dm644 README "${pkgdir}/usr/share/doc/${pkgname}/README"
     fi
 }
