@@ -3,7 +3,7 @@
 pkgname=thunar-labs
 pkgdesc="Modern, fast and easy-to-use file manager for Xfce with embedded terminal support"
 depends=('desktop-file-utils' 'libexif' 'hicolor-icon-theme' 'libnotify'
-         'pcre2' 'libgudev' 'exo' 'libxfce4util' 'libxfce4ui' 'libpng' 'vt3')
+         'pcre2' 'libgudev' 'exo' 'libxfce4util' 'libxfce4ui' 'libpng' 'vte3')
 makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools')
 optdepends=('catfish: file searching'
             'gvfs: trash support, mounting with udisk and remote filesystems'
