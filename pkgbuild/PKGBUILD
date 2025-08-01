@@ -4,7 +4,7 @@ pkgname=thunar-labs
 pkgdesc="Modern, fast and easy-to-use file manager for Xfce with embedded terminal support"
 depends=('desktop-file-utils' 'libexif' 'hicolor-icon-theme' 'libnotify'
          'pcre2' 'libgudev' 'exo' 'libxfce4util' 'libxfce4ui' 'libpng' 'vte3')
-makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools')
+makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools' 'meson' 'ninja')
 optdepends=('catfish: file searching'
             'gvfs: trash support, mounting with udisk and remote filesystems'
             'tumbler: thumbnail previews'
@@ -31,35 +31,30 @@ fi
 
 prepare() {
     cd "${srcdir}/thunar"
-    NOCONFIGURE=1 ./autogen.sh
+    # Meson doesn't need autogen.sh
 }
 
 build() {
     cd "${srcdir}/thunar"
     
-    ./configure \
+    arch-meson . build \
         --prefix=/usr \
         --sysconfdir=/etc \
-        --enable-gio-unix \
-        --enable-gudev \
-        --enable-notifications \
-        --enable-exif \
-        --enable-gtk-doc \
-        --disable-debug \
-        --enable-maintainer-mode
-    make
+        -Dintrospection=enabled \
+        -Dgtk_doc=true
+    
+    meson compile -C build
 }
 
 check() {
     cd "${srcdir}/thunar"
-    # Add check/test steps here, if needed
-    # For example: make check
+    meson test -C build --print-errorlogs || true
 }
 
 package() {
     cd "${srcdir}/thunar"
     
-    make DESTDIR="$pkgdir" install
+    meson install -C build --destdir "$pkgdir"
 
     # Install license file if present
     if [ -f "COPYING" ]; then
