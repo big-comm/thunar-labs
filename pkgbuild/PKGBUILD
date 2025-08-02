@@ -4,7 +4,7 @@ pkgname=thunar-labs
 pkgdesc="Modern, fast and easy-to-use file manager for Xfce with embedded terminal support"
 depends=('desktop-file-utils' 'libexif' 'hicolor-icon-theme' 'libnotify'
          'pcre2' 'libgudev' 'exo' 'libxfce4util' 'libxfce4ui' 'libpng' 'vte3')
-makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools' 'meson' 'ninja')
+makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools' 'meson' 'ninja' 'gtk-doc')
 optdepends=('catfish: file searching'
             'gvfs: trash support, mounting with udisk and remote filesystems'
             'tumbler: thumbnail previews'
@@ -38,8 +38,12 @@ build() {
     cd "${srcdir}/thunar"
     
     arch-meson . build \
+        -Dgtk-doc=true \
         -Dintrospection=true \
-        -Dgtk_doc=true
+        -Dgio-unix=enabled \
+        -Dgudev=enabled \
+        -Dlibnotify=enabled \
+        -Dpolkit=enabled
     
     meson compile -C build
 }
