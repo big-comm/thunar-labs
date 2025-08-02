@@ -4,7 +4,7 @@ pkgname=thunar-labs
 pkgdesc="Modern, fast and easy-to-use file manager for Xfce with embedded terminal support"
 depends=('desktop-file-utils' 'libexif' 'hicolor-icon-theme' 'libnotify'
          'pcre2' 'libgudev' 'exo' 'libxfce4util' 'libxfce4ui' 'libpng' 'vte3')
-makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools' 'meson' 'ninja' 'gtk-doc')
+makedepends=('git' 'glib2-devel' 'gobject-introspection' 'xfce4-panel' 'xfce4-dev-tools' 'meson' 'ninja')
 optdepends=('catfish: file searching'
             'gvfs: trash support, mounting with udisk and remote filesystems'
             'tumbler: thumbnail previews'
@@ -37,26 +37,19 @@ prepare() {
 build() {
     cd "${srcdir}/thunar"
     
-    arch-meson . build \
-        -Dgtk-doc=true \
-        -Dintrospection=true \
-        -Dgio-unix=enabled \
-        -Dgudev=enabled \
-        -Dlibnotify=enabled \
-        -Dpolkit=enabled
-    
-    meson compile -C build
+    arch-meson . build
+    ninja -C build
 }
 
 check() {
     cd "${srcdir}/thunar"
-    meson test -C build --print-errorlogs || true
+    ninja -C build test || true
 }
 
 package() {
     cd "${srcdir}/thunar"
     
-    meson install -C build --destdir "$pkgdir"
+    DESTDIR="$pkgdir" ninja -C build install
 
     # Install license file if present
     if [ -f "COPYING" ]; then
