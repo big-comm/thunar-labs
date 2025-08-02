@@ -38,9 +38,7 @@ build() {
     cd "${srcdir}/thunar"
     
     arch-meson . build \
-        --prefix=/usr \
-        --sysconfdir=/etc \
-        -Dintrospection=enabled \
+        -Dintrospection=true \
         -Dgtk_doc=true
     
     meson compile -C build
